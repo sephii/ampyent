@@ -3,7 +3,7 @@ import random
 from threading import Thread, Event
 from sounds import Sound
 
-logger = logging.getLogger('scene')
+logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.ERROR)
 
 
@@ -144,3 +144,5 @@ class Scenario(object):
     def __init__(self, name):
         self.name = name
         self.scenes = []
+
+print(__name__)

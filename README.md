@@ -42,32 +42,25 @@ make the associated sound to be played.
 Configuration file syntax
 =========================
 
-Configuration is done with a simple json file:
+Configuration is done with a simple yml file that must be named `~/.ampyent`:
 
 ```
-{
-    "01 my scenario": {
-        "01 my first scene": [
-            {
-                "path": "/home/me/sounds/great_music.wav",
-                "loop": true,
-                "fadein": 5
-            },
-            {
-                "path": "/home/me/sounds/wolves.wav",
-                "loop": false,
-                "start_at": 10,
-                "volume": 70,
-                "random": 0.2,
-                "bind_to": "1"
-            }
-        ],
-        "02 my second scene": [
-            {
-                "path": "/home/me/sounds/thunder.wav",
-                "loop": true
-            }
-        ]
-    }
-}
+"01 my scenario":
+    "01 my first scene":
+        - path:   /home/me/sounds/great_music.wav
+          loop:   true
+          fadein: 5
+
+        - path:
+              - /home/me/sounds/wolves1.wav
+              - /home/me/sounds/wolves2.wav
+          loop:     false
+          start_at: 10
+          volume:   70
+          random:   0.2
+          bind_to:  1
+
+    "02 my second scene":
+        - path: /home/me/sounds/thunder.wav
+          loop: true
 ```

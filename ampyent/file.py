@@ -1,35 +1,5 @@
-import json
-from collections import OrderedDict
 from scene import Scene, SceneSound, Scenario
-
-
-def export_scene(scene):
-    export = []
-
-    for sound in scene.sounds:
-        export.append({
-            'path': sound.path,
-            'volume': sound.volume,
-            'start_at': sound.start_at,
-            'loop': sound.loop,
-        })
-
-    return json.dumps(export)
-
-
-def import_scene(scene_contents):
-    scene = Scene()
-    imported_data = json.loads(scene_contents)
-
-    for sound in imported_data:
-        scene_sound = SceneSound(sound['path'])
-        scene_sound.volume = sound['volume']
-        scene_sound.start_at = sound['start_at']
-        scene_sound.loop = sound['loop']
-
-        scene.sounds.append(scene_sound)
-
-    return scene
+from yaml import load
 
 
 def dict_to_scene(name, scene_dict):
@@ -42,7 +12,7 @@ def dict_to_scene(name, scene_dict):
         scene_sound.loop = sound.get('loop', False)
         scene_sound.random = sound.get('random', 0)
         scene_sound.fadein = sound.get('fadein', 0)
-        scene_sound.bind_to = sound.get('bind_to', None)
+        scene_sound.bind_to = str(sound.get('bind_to', '')) or None
         scene_sound.auto_start = sound.get('auto_start', True)
         scene.sounds.append(scene_sound)
 
@@ -50,14 +20,14 @@ def dict_to_scene(name, scene_dict):
 
 
 def import_config(contents):
-    config = json.loads(contents)
+    config = load(contents)
     scenarios = []
 
-    for key in sorted(config.iterkeys(), key=unicode.lower):
+    for key in sorted(config.iterkeys(), key=str.lower):
         scenario = Scenario(key)
         scenes = []
 
-        for scene_key in sorted(config[key].iterkeys(), key=unicode.lower):
+        for scene_key in sorted(config[key].iterkeys(), key=str.lower):
             scenes.append(dict_to_scene(scene_key, config[key][scene_key]))
 
         scenario.scenes = scenes
