@@ -1,10 +1,9 @@
 import curses
-import curses.textpad
+import os
 import sys
-from file import import_scene, export_scene, import_config
-from scene import Scene, SceneSound
+from file import import_config
 
-with open('/home/sylvain/.ampyent', 'r') as file:
+with open(os.path.expanduser('~/.ampyent'), 'r') as file:
     scenarios = import_config(file.read())
 
 scenario_name = sys.argv[1]
