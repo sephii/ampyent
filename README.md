@@ -6,6 +6,7 @@ Requirements
 
 * mplayer
 * [mplayer.py](https://github.com/baudm/mplayer.py)
+* [PyYAML](https://pypi.python.org/pypi/PyYAML)
 * curses-compatible OS (ie. not Windows)
 
 Installation
@@ -29,7 +30,7 @@ This will run ampyent and open your scenario but you'll notice that nothing is
 playing. You'll need to press the `p` (for **p**lay) to start your first scene.
 Here's a summary of the controls:
 
-* `p`: play scene
+* Space: play scene
 * `s`: stop
 * `right arrow`: next scene
 * `q`: quit ampyent

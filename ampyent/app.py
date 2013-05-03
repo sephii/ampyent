@@ -1,10 +1,10 @@
 import curses
 import os
 import sys
-from file import import_config
+from file import load_scenarios
 
 with open(os.path.expanduser('~/.ampyent'), 'r') as file:
-    scenarios = import_config(file.read())
+    scenarios = load_scenarios(file.read())
 
 scenario_name = sys.argv[1]
 
@@ -21,7 +21,7 @@ if chosen_scenario is None:
 def main(stdscr):
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     stdscr.addstr('Using scenario ', curses.color_pair(1))
-    stdscr.addstr('{0}.\n'.format(chosen_scenario.name), curses.A_BOLD | curses.color_pair(1))
+    stdscr.addstr('{0}.\n'.format(chosen_scenario.name.encode('utf-8')), curses.A_BOLD | curses.color_pair(1))
     stdscr.refresh()
 
     current_scene_id = 0
@@ -30,12 +30,12 @@ def main(stdscr):
     while 1:
         c = stdscr.getch()
 
-        if c == ord('p'):
+        if c == ord(' '):
             stdscr.addstr('Playing scene ')
-            stdscr.addstr(scenes[current_scene_id].name, curses.A_BOLD)
+            stdscr.addstr(scenes[current_scene_id].name.encode('utf-8'), curses.A_BOLD)
             try:
                 next_scene = scenes[current_scene_id + 1]
-                stdscr.addstr(' (next scene is {0})'.format(next_scene.name))
+                stdscr.addstr(' (next scene is {0})'.format(next_scene.name.encode('utf-8')))
             except IndexError:
                 stdscr.addstr(' (last scene)')
             stdscr.addstr('\n')
@@ -62,7 +62,7 @@ def main(stdscr):
             stdscr.addstr(scenes[current_scene_id].name, curses.A_BOLD)
             try:
                 next_scene = scenes[current_scene_id + 1]
-                stdscr.addstr(' (next scene is {0})'.format(next_scene.name))
+                stdscr.addstr(' (next scene is {0})'.format(next_scene.name.encode('utf-8')))
             except IndexError:
                 stdscr.addstr(' (last scene)')
             stdscr.addstr('\n')
@@ -81,6 +81,6 @@ def main(stdscr):
             for sound in scenes[current_scene_id].sounds:
                 if sound.bind_to is not None and c == ord(sound.bind_to):
                     stdscr.addstr('playing {0}\n'.format(sound.path))
-                    sound.play(ignore_start_at=True)
+                    sound.play_now()
 
 curses.wrapper(main)
