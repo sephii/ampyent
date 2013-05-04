@@ -1,5 +1,13 @@
-**This project is in very early development stage, don't expect it to work for
-you yet.**
+What is Ampyent?
+================
+
+Ampyent allows you to create ambiances by playing multiple sounds together.
+Imagine a rainy scene, with thunder and wolf howls in the background. You could
+create such a scene by adding a rain track, putting some random thunder sounds
+on top of it and manually activated wolf howls.
+
+There are several free sound databases such as freesound.org. You can also
+find great samples in games such as Baldur's Gate.
 
 Requirements
 ============
@@ -20,7 +28,7 @@ If you're having issues with the dependencies (PyYAML and mplayer.py), install
 them manually:
 
 ```
-pip install -r https://github.com/sephii/ampyent/blob/requirements.txt
+pip install -r https://github.com/sephii/ampyent/raw/master/requirements.txt
 ```
 
 Usage
