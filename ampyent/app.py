@@ -1,86 +1,83 @@
-import curses
+import logging
 import os
 import sys
+
 from file import load_scenarios
-
-with open(os.path.expanduser('~/.ampyent'), 'r') as file:
-    scenarios = load_scenarios(file.read())
-
-scenario_name = sys.argv[1]
-
-chosen_scenario = None
-for scenario in scenarios:
-    if scenario.name.startswith(scenario_name):
-        chosen_scenario = scenario
-        break
-
-if chosen_scenario is None:
-    raise Exception('Could not find scenario {0}'.format(scenario_name))
+from ui.curses_ui import MainWindow
 
 
-def main(stdscr):
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    stdscr.addstr('Using scenario ', curses.color_pair(1))
-    stdscr.addstr('{0}.\n'.format(chosen_scenario.name.encode('utf-8')), curses.A_BOLD | curses.color_pair(1))
-    stdscr.refresh()
+class AmpyentController(object):
+    CONFIG_FILE_PATH = os.path.expanduser('~/.ampyent')
 
-    current_scene_id = 0
-    scenes = chosen_scenario.scenes
+    def __init__(self):
+        logging.basicConfig(level=logging.ERROR)
+        self.scenario = None
+        self.current_scene_id = 0
 
-    while 1:
-        c = stdscr.getch()
+        if len(sys.argv) < 2:
+            raise Exception("Usage: ampyent scenario_name")
 
-        if c == ord(' '):
-            stdscr.addstr('Playing scene ')
-            stdscr.addstr(scenes[current_scene_id].name.encode('utf-8'), curses.A_BOLD)
-            try:
-                next_scene = scenes[current_scene_id + 1]
-                stdscr.addstr(' (next scene is {0})'.format(next_scene.name.encode('utf-8')))
-            except IndexError:
-                stdscr.addstr(' (last scene)')
-            stdscr.addstr('\n')
-            bindings = {}
-            for sound in scenes[current_scene_id].sounds:
-                if sound.bind_to is not None:
-                    bindings[sound.bind_to] = sound.path
+        if not os.path.exists(self.CONFIG_FILE_PATH):
+            raise Exception("Error: config file {0} doesn't exist",
+                            self.CONFIG_FILE_PATH)
 
-            if bindings:
-                stdscr.addstr('You can use the following sounds:\n')
-                for binding, sound in bindings.iteritems():
-                    stdscr.addstr('{0}: {1}\n'.format(binding, sound))
+        with open(self.CONFIG_FILE_PATH) as file:
+            scenarios = load_scenarios(file.read())
 
-            scenes[current_scene_id].play()
-        elif c == ord('q'):
-            scenes[current_scene_id].stop()
-            break
-        elif c == ord('s'):
-            scenes[current_scene_id].stop()
-        elif c == curses.KEY_RIGHT:
-            scenes[current_scene_id].stop()
-            current_scene_id += 1
-            stdscr.addstr('Playing scene ')
-            stdscr.addstr(scenes[current_scene_id].name, curses.A_BOLD)
-            try:
-                next_scene = scenes[current_scene_id + 1]
-                stdscr.addstr(' (next scene is {0})'.format(next_scene.name.encode('utf-8')))
-            except IndexError:
-                stdscr.addstr(' (last scene)')
-            stdscr.addstr('\n')
-            bindings = {}
-            for sound in scenes[current_scene_id].sounds:
-                if sound.bind_to is not None:
-                    bindings[sound.bind_to] = sound.path
+        scenario_name = sys.argv[1]
+        self.ui = MainWindow()
 
-            if bindings:
-                stdscr.addstr('You can use the following sounds:\n')
-                for binding, sound in bindings.iteritems():
-                    stdscr.addstr('{0}: {1}\n'.format(binding, sound))
+        for scenario in scenarios:
+            if scenario.name.startswith(scenario_name):
+                self.scenario = scenario
+                break
 
-            scenes[current_scene_id].play()
-        else:
-            for sound in scenes[current_scene_id].sounds:
-                if sound.bind_to is not None and c == ord(sound.bind_to):
-                    stdscr.addstr('playing {0}\n'.format(sound.path))
-                    sound.play_now()
+        if self.scenario is None:
+            raise Exception(
+                'Could not find scenario {0}'.format(scenario_name)
+            )
 
-curses.wrapper(main)
+        self.ui.bind_action(MainWindow.ACTION_PLAY, self.play_current_scene)
+        self.ui.bind_action(MainWindow.ACTION_STOP, self.stop_current_scene)
+        self.ui.bind_action(MainWindow.ACTION_NEXT, self.next_scene)
+        self.ui.bind_action(MainWindow.ACTION_BINDING, self.handle_binding)
+        self.ui.bind_action(MainWindow.ACTION_QUIT, self.quit)
+
+        self.ui.start_screen(self.scenario)
+        self.ui.input_loop()
+
+    def get_current_scene(self):
+        return self.scenario.scenes[self.current_scene_id]
+
+    def get_next_scene(self):
+        try:
+            next_scene = self.scenario.scenes[self.current_scene_id + 1]
+        except IndexError:
+            next_scene = None
+
+        return next_scene
+
+    def play_current_scene(self):
+        self.ui.show_playing_scene(self.get_current_scene(),
+                                   self.get_next_scene())
+        self.get_current_scene().play()
+
+    def stop_current_scene(self):
+        self.get_current_scene().stop()
+
+    def next_scene(self):
+        self.stop_current_scene()
+        self.current_scene_id += 1
+
+        try:
+            self.play_current_scene()
+        except IndexError:
+            self.current_scene_id -= 1
+
+    def handle_binding(self, sound):
+        sound.play_now()
+
+    def quit(self):
+        self.stop_current_scene()
+
+AmpyentController()

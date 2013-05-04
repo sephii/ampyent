@@ -5,7 +5,6 @@ from threading import Thread, Event
 from sounds import Sound
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 
 class SceneSound(object):
@@ -143,6 +142,15 @@ class Scene(object):
         for sound in self.sounds:
             logger.debug('[Scene %s] Stopping %s', self.name, sound.path)
             sound.stop()
+
+    def get_bindings(self):
+        bindings = {}
+
+        for sound in self.sounds:
+            if sound.bind_to is not None:
+                bindings[sound.bind_to] = sound
+
+        return bindings
 
 
 class Scenario(object):
