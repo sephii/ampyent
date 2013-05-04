@@ -12,7 +12,16 @@ Requirements
 Installation
 ============
 
-TODO
+```
+pip install git+git://github.com/sephii/ampyent@master
+```
+
+If you're having issues with the dependencies (PyYAML and mplayer.py), install
+them manually:
+
+```
+pip install -r https://github.com/sephii/ampyent/blob/requirements.txt
+```
 
 Usage
 =====

@@ -80,4 +80,9 @@ class AmpyentController(object):
     def quit(self):
         self.stop_current_scene()
 
-AmpyentController()
+
+def main():
+    AmpyentController()
+
+if __name__ == '__main__':
+    main()

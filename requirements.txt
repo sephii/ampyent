@@ -1,0 +1,2 @@
+PyYAML==3.10
+mplayer.py==0.7.0
