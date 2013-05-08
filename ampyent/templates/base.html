@@ -1,0 +1,19 @@
+<!doctype html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/foundation.min.css') }}"/>
+</head>
+<body>
+    <div class="row">
+        <div class="large-12 small-12 columns">
+            {% if current_scene %}
+            <div data-alert class="alert-box success">
+                Currently playing {{ current_scene.name }}
+            </div>
+            {% endif %}
+            <h1>Scenarios</h1>
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>

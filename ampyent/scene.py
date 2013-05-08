@@ -157,3 +157,10 @@ class Scenario(object):
     def __init__(self, name):
         self.name = name
         self.scenes = []
+
+    def get_scene_by_name(self, scene_name):
+        for scene in self.scenes:
+            if scene.name == scene_name:
+                return scene
+
+        raise KeyError("Scene not found")

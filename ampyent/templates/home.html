@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table>
+    <thead>
+        <tr>
+            <th>Scenario</th>
+            <th># scenes</th>
+        </tr>
+    </thead>
+    <tbody>
+{% for scenario in scenarios %}
+    <tr>
+        <td><a href="{{ url_for('show_scenario', scenario_name= scenario.name) }}">{{ scenario.name }}</a></td>
+        <td>{{ scenario.scenes|length }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

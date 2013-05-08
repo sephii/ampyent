@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+    {% for scene in scenario.scenes %}
+    <li><a href="{{ url_for('play_scene', scenario_name=scenario.name, scene_name=scene.name) }}">{{ scene.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

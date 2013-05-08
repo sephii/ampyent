@@ -1,88 +1,39 @@
 import logging
-import os
-import sys
 
-from file import load_scenarios
-from ui.curses_ui import MainWindow
+from flask import Flask, render_template, redirect, url_for
+from application import ampyent_app
 
+logging.basicConfig(level=logging.DEBUG)
+print(ampyent_app.scenarios)
 
-class AmpyentController(object):
-    CONFIG_FILE_PATH = os.path.expanduser('~/.ampyent')
-
-    def __init__(self):
-        logging.basicConfig(level=logging.ERROR)
-        self.scenario = None
-        self.current_scene_id = 0
-
-        if len(sys.argv) < 2:
-            raise Exception("Usage: ampyent scenario_name")
-
-        if not os.path.exists(self.CONFIG_FILE_PATH):
-            raise Exception("Error: config file {0} doesn't exist",
-                            self.CONFIG_FILE_PATH)
-
-        with open(self.CONFIG_FILE_PATH) as file:
-            scenarios = load_scenarios(file.read())
-
-        scenario_name = sys.argv[1]
-        self.ui = MainWindow()
-
-        for scenario in scenarios:
-            if scenario.name.startswith(scenario_name):
-                self.scenario = scenario
-                break
-
-        if self.scenario is None:
-            raise Exception(
-                'Could not find scenario {0}'.format(scenario_name)
-            )
-
-        self.ui.bind_action(MainWindow.ACTION_PLAY, self.play_current_scene)
-        self.ui.bind_action(MainWindow.ACTION_STOP, self.stop_current_scene)
-        self.ui.bind_action(MainWindow.ACTION_NEXT, self.next_scene)
-        self.ui.bind_action(MainWindow.ACTION_BINDING, self.handle_binding)
-        self.ui.bind_action(MainWindow.ACTION_QUIT, self.quit)
-
-        self.ui.start_screen(self.scenario)
-        self.ui.input_loop()
-
-    def get_current_scene(self):
-        return self.scenario.scenes[self.current_scene_id]
-
-    def get_next_scene(self):
-        try:
-            next_scene = self.scenario.scenes[self.current_scene_id + 1]
-        except IndexError:
-            next_scene = None
-
-        return next_scene
-
-    def play_current_scene(self):
-        self.ui.show_playing_scene(self.get_current_scene(),
-                                   self.get_next_scene())
-        self.get_current_scene().play()
-
-    def stop_current_scene(self):
-        self.get_current_scene().stop()
-
-    def next_scene(self):
-        self.stop_current_scene()
-        self.current_scene_id += 1
-
-        try:
-            self.play_current_scene()
-        except IndexError:
-            self.current_scene_id -= 1
-
-    def handle_binding(self, sound):
-        sound.play_now()
-
-    def quit(self):
-        self.stop_current_scene()
+app = Flask(__name__)
 
 
-def main():
-    AmpyentController()
+@app.route('/')
+def home():
+    scenarios = ampyent_app.scenarios
+    return render_template('home.html', scenarios=scenarios)
 
-if __name__ == '__main__':
-    main()
+
+@app.route('/scenario/<scenario_name>/')
+def show_scenario(scenario_name):
+    selected_scenario = ampyent_app.get_scenario_by_name(scenario_name)
+
+    return render_template('scenario.html', scenario=selected_scenario)
+
+
+@app.route('/scenario/<scenario_name>/<scene_name>/')
+def play_scene(scenario_name, scene_name):
+    selected_scenario = ampyent_app.get_scenario_by_name(scenario_name)
+    selected_scene = selected_scenario.get_scene_by_name(scene_name)
+
+    ampyent_app.play_scene(selected_scene)
+
+    return redirect(url_for('show_scenario', scenario_name=scenario_name))
+
+
+@app.context_processor
+def inject_current_scene():
+    return dict(current_scene=ampyent_app.current_scene)
+
+app.run(debug=True)
