@@ -12,8 +12,11 @@ class Application(object):
     @property
     def scenarios(self):
         if not self._scenarios:
-            with open(self.CONFIG_FILE_PATH) as file:
-                self._scenarios = load_scenarios(file.read())
+            try:
+                with open(self.CONFIG_FILE_PATH) as file:
+                    self._scenarios = load_scenarios(file.read())
+            except IOError:
+                pass
 
         return self._scenarios
 

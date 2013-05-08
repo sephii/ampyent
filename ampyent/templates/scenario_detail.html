@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h1>Scenario "{{ scenario.name }}"</h1>
+
+{% if scenario.scenes %}
 <ul>
     {% for scene in scenario.scenes %}
     <li><a href="{{ url_for('play_scene', scenario_name=scenario.name, scene_name=scene.name) }}">{{ scene.name }}</a></li>
     {% endfor %}
 </ul>
+{% else %}
+<p>There isn't any scene defined for this scenario. <a href="{{ url_for('create_scene', scenario_name=scenario.name) }}">Create a new scene.</a></p>
+{% endif %}
 {% endblock %}
